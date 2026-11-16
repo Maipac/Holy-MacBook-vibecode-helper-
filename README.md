@@ -10,7 +10,7 @@ Die App hat ein Fenster mit dem Knopf und ein Symbol in der Menüleiste (abschal
 
 ## Bauen
 
-Du brauchst macOS 13 oder neuer und Xcode oder die Command Line Tools (`xcode-select --install`).
+Du brauchst macOS 13 oder neuer und Xcode oder die Command Line Tools (`xcode-select --install`). Xcode ist nicht nötig, die Command Line Tools reichen.
 
 ```bash
 ./build.sh
