@@ -29,25 +29,3 @@ jobs:
         with:
           name: HolyMacBook
           path: HolyMacBook.zip
-
-      # Vorübergehend: Kontrolle des Menüleisten-Symbols.
-      - name: Probelauf mit Bildschirmfotos
-        run: |
-          set +e
-          APP="build/Holy MacBook.app"
-          mkdir shots
-          sudo sh -c "$("$APP/Contents/MacOS/HolyMacBook" --print-setup-command)"
-          open "$APP"; sleep 6
-          osascript -e 'tell application "System Events" to tell process "HolyMacBook" to get {name, description} of every menu bar item of menu bar 2'
-          screencapture -x shots/1-off.png
-          osascript -e 'tell application "System Events" to tell process "HolyMacBook" to click checkbox 1 of group 1 of window 1'; sleep 3
-          osascript -e 'tell application "System Events" to tell process "HolyMacBook" to get {name, description} of every menu bar item of menu bar 2'
-          screencapture -x shots/2-on.png
-          osascript -e 'tell application "Holy MacBook" to quit'; sleep 3
-          pmset -g | grep -i sleepdisabled
-          exit 0
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: shots
-          path: shots
