@@ -50,18 +50,29 @@ struct HolyMacBookApp: App {
             CommandGroup(replacing: .help) {}
         }
 
-        MenuBarExtra(
-            "Holy MacBook",
-            systemImage: controller.isActive ? "sun.max.fill" : "moon.zzz",
-            isInserted: $showMenuBarExtra
-        ) {
+        MenuBarExtra(isInserted: $showMenuBarExtra) {
             MenuBarMenu()
                 .environmentObject(controller)
+        } label: {
+            Image(nsImage: Self.menuBarImage(isActive: controller.isActive))
         }
 
         Settings {
             SettingsView()
         }
+    }
+}
+
+extension HolyMacBookApp {
+    /// Das Symbol für die Menüleiste. Die Beschreibung ist wichtig: Ohne sie liest
+    /// VoiceOver den Namen des Symbols vor („Helligkeit höher“) statt den der App.
+    static func menuBarImage(isActive: Bool) -> NSImage {
+        let image = NSImage(
+            systemSymbolName: isActive ? "sun.max.fill" : "moon.zzz",
+            accessibilityDescription: isActive ? "Holy MacBook, Wachhalten an" : "Holy MacBook, Wachhalten aus"
+        ) ?? NSImage()
+        image.isTemplate = true
+        return image
     }
 }
 

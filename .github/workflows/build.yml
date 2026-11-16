@@ -30,39 +30,21 @@ jobs:
           name: HolyMacBook
           path: HolyMacBook.zip
 
-      # Vorübergehend: Bildschirmfotos und ein echter Durchlauf zur Kontrolle.
+      # Vorübergehend: Kontrolle des Menüleisten-Symbols.
       - name: Probelauf mit Bildschirmfotos
         run: |
           set +e
           APP="build/Holy MacBook.app"
-          BIN="$APP/Contents/MacOS/HolyMacBook"
           mkdir shots
-          state() { pmset -g | grep -i sleepdisabled || echo "SleepDisabled fehlt in pmset -g"; }
-          start() { open "$APP"; sleep 6; }
-          stop() { osascript -e 'tell application "Holy MacBook" to quit'; sleep 3; pkill -x HolyMacBook; sleep 1; }
-          shot() { screencapture -x "shots/$1.png"; }
-          ui() { osascript -e "tell application \"System Events\" to tell process \"HolyMacBook\" to $1"; }
-
-          sudo sh -c "$("$BIN" --print-setup-command)"; echo "setup exit $?"
-
-          echo "== hell: Klick schaltet ein"
-          start; shot 1-off-light
-          ui 'click checkbox 1 of group 1 of window 1'; sleep 3; state; shot 2-on-light
-          echo "== Menue der Menueleiste"
-          ui 'get every menu bar item of menu bar 2'
-          ui 'click menu bar item 1 of menu bar 2' & sleep 3; shot 3-menu-light
-          osascript -e 'tell application "System Events" to key code 53'; sleep 1
-          echo "== Einstellungen"
-          ui 'set frontmost to true'; osascript -e 'tell application "System Events" to keystroke "," using command down'; sleep 3; shot 4-settings-light
-          echo "== Beenden schaltet aus"
-          stop; state
-
-          echo "== dunkel"
-          osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true'; sleep 2
-          start; shot 5-off-dark
-          ui 'click checkbox 1 of group 1 of window 1'; sleep 3; state; shot 6-on-dark
-          stop; state
-          sudo pmset -a disablesleep 0
+          sudo sh -c "$("$APP/Contents/MacOS/HolyMacBook" --print-setup-command)"
+          open "$APP"; sleep 6
+          osascript -e 'tell application "System Events" to tell process "HolyMacBook" to get {name, description} of every menu bar item of menu bar 2'
+          screencapture -x shots/1-off.png
+          osascript -e 'tell application "System Events" to tell process "HolyMacBook" to click checkbox 1 of group 1 of window 1'; sleep 3
+          osascript -e 'tell application "System Events" to tell process "HolyMacBook" to get {name, description} of every menu bar item of menu bar 2'
+          screencapture -x shots/2-on.png
+          osascript -e 'tell application "Holy MacBook" to quit'; sleep 3
+          pmset -g | grep -i sleepdisabled
           exit 0
 
       - uses: actions/upload-artifact@v4
