@@ -68,7 +68,7 @@ private struct HaloFace: View {
         .opacity(isEnabled ? 1 : 0.45)
         .padding(Self.haloGap)
         .contentShape(Circle())
-        .contentShape(.focusRing, Circle())
+        .contentShape(.focusEffect, Circle())
         .onHover { isHovered = $0 }
         .animation(stateAnimation, value: isOn)
         .animation(.easeOut(duration: 0.12), value: isPressed)
