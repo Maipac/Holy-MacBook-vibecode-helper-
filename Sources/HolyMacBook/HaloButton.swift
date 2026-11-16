@@ -42,6 +42,10 @@ private struct HaloButtonStyle: ButtonStyle {
     }
 }
 
+private final class HoverState: ObservableObject {
+    @Published var isHovered = false
+}
+
 private struct HaloFace: View {
     let isOn: Bool
     let isPressed: Bool
@@ -49,7 +53,9 @@ private struct HaloFace: View {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorSchemeContrast) private var contrast
-    @State private var isHovered = false
+    // Kein @State: Seit dem macOS-27-SDK ist @State ein Makro, und dessen Plugin liegt nur
+    // Xcode bei, nicht den Command Line Tools. Mit @StateObject baut die App mit beidem.
+    @StateObject private var hover = HoverState()
 
     private static let diameter: CGFloat = 168
     private static let haloGap: CGFloat = 14
@@ -75,13 +81,13 @@ private struct HaloFace: View {
                 .foregroundStyle(isOn ? Color.black.opacity(0.82) : Color.primary.opacity(0.75))
                 .accessibilityHidden(true)
         }
-        .brightness(isPressed ? -0.08 : (isHovered && isEnabled ? 0.03 : 0))
+        .brightness(isPressed ? -0.08 : (hover.isHovered && isEnabled ? 0.03 : 0))
         .scaleEffect(isPressed ? 0.96 : 1)
         .opacity(isEnabled ? 1 : 0.45)
         .padding(Self.haloGap)
         .contentShape(Circle())
         .contentShape(.focusEffect, Circle())
-        .onHover { isHovered = $0 }
+        .onHover { hover.isHovered = $0 }
         .animation(stateAnimation, value: isOn)
         .animation(.easeOut(duration: 0.12), value: isPressed)
     }
