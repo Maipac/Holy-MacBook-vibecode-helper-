@@ -8,7 +8,7 @@ struct ContentView: View {
             HaloButton(isOn: controller.isActive) {
                 controller.toggle()
             }
-            .disabled(!controller.isSetUp || controller.isBusy)
+            .disabled(!controller.isSetUp)
             .padding(.top, 20)
             .padding(.bottom, 14)
 
@@ -47,29 +47,40 @@ struct ContentView: View {
             return "Richte Holy MacBook einmal ein, dann schaltet der Knopf sofort."
         }
         return controller.isActive
-            ? "Dein MacBook bleibt wach, auch wenn du es zuklappst."
-            : "Dein MacBook schläft beim Zuklappen wie gewohnt."
+            ? "Das MacBook bleibt wach, auch zugeklappt."
+            : "Das MacBook schläft beim Zuklappen wie gewohnt."
     }
 }
 
 // MARK: Hinweis
 
 private struct NoticeView: View {
+    @EnvironmentObject private var controller: KeepAwakeController
     let notice: KeepAwakeController.Notice
 
     var body: some View {
-        Label {
-            Text(notice.text)
-                .fixedSize(horizontal: false, vertical: true)
-        } icon: {
-            Image(systemName: isError ? "xmark.octagon.fill" : "exclamationmark.triangle.fill")
-                .foregroundStyle(isError ? Color.red : Color.orange)
+        VStack(alignment: .leading, spacing: 8) {
+            // Gelb und Orange gehören dem leuchtenden Knopf. Die Warnung bleibt deshalb
+            // farblos und wird über das Dreieck erkannt, nur Fehler sind rot.
+            Label {
+                Text(notice.text)
+                    .fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: isWarning ? "exclamationmark.triangle.fill" : "xmark.octagon.fill")
+                    .foregroundStyle(isWarning ? AnyShapeStyle(.secondary) : AnyShapeStyle(Color.red))
+            }
+            if case .setupBroken = notice {
+                Button("Neu einrichten…") {
+                    controller.runSetup()
+                }
+                .disabled(controller.isBusy)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var isError: Bool {
-        if case .error = notice { return true }
+    private var isWarning: Bool {
+        if case .warning = notice { return true }
         return false
     }
 }
@@ -84,7 +95,7 @@ private struct SetupBox: View {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Einmalige Einrichtung")
                     .font(.headline)
-                Text("Damit dein MacBook zugeklappt wach bleibt, braucht macOS einmal dein Passwort. Holy MacBook darf danach genau eine Sache ohne Nachfrage: den Ruhezustand sperren und wieder freigeben.")
+                Text("Damit das MacBook zugeklappt wach bleibt, braucht macOS einmal dein Passwort. Holy MacBook darf danach genau eine Sache ohne Nachfrage: den Ruhezustand sperren und wieder freigeben.")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 Button("Einrichten…") {
@@ -168,9 +179,11 @@ private struct ProtectionRow: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 8)
+            // Kleine Schalter, damit der große Knopf das einzige betonte Element bleibt.
             Toggle(title, isOn: $isOn)
                 .labelsHidden()
                 .toggleStyle(.switch)
+                .controlSize(.mini)
         }
     }
 }

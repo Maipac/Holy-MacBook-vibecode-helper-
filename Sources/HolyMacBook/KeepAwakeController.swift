@@ -15,10 +15,12 @@ final class KeepAwakeController: ObservableObject {
         /// Die Schutzabschaltung hat das Wachhalten beendet oder gar nicht erst zugelassen.
         case warning(String)
         case error(String)
+        /// Die sudo-Regel fehlt oder greift nicht. Das Fenster bietet dazu „Neu einrichten…“ an.
+        case setupBroken(String)
 
         var text: String {
             switch self {
-            case .warning(let text), .error(let text): return text
+            case .warning(let text), .error(let text), .setupBroken(let text): return text
             }
         }
     }
@@ -87,9 +89,9 @@ final class KeepAwakeController: ObservableObject {
                 notice = nil
             } else {
                 isSetUp = PowerControl.isSetUp
-                notice = .error(isSetUp
-                    ? "Das Umschalten hat nicht geklappt. Entferne die Einrichtung über das Menü „Wachhalten“ und richte sie neu ein."
-                    : "Die Einrichtung fehlt. Richte Holy MacBook neu ein.")
+                notice = isSetUp
+                    ? .setupBroken("Das Umschalten hat nicht geklappt. Die Einrichtung greift nicht mehr.")
+                    : .error("Die Einrichtung fehlt. Richte Holy MacBook neu ein.")
             }
             isBusy = false
         }
@@ -173,7 +175,7 @@ final class KeepAwakeController: ObservableObject {
                 return "der Lüfter läuft"
             }
             if reading.thermalState == .serious || reading.thermalState == .critical {
-                return "dein Mac zu warm ist"
+                return "der Mac zu warm ist"
             }
         }
         return nil

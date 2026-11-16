@@ -39,6 +39,7 @@ Rückgängig machen: Menü **Wachhalten → Einrichtung entfernen…** oder von 
 ## Gut zu wissen
 
 - Beim Beenden der App wird das Wachhalten ausgeschaltet. Die Schutzabschaltung läuft nur, solange die App läuft.
+- Mit `--print-setup-command` statt `--diagnose` zeigt die App den Befehl, den die Einrichtung ausführt.
 - Stürzt die App ab, während das Wachhalten an ist, bleibt es an. Beim nächsten Start zeigt der Knopf den echten Zustand. Notfalls im Terminal: `sudo pmset -a disablesleep 0`.
 - Auf MacBooks ohne Lüfter (MacBook Air) achtet die App statt auf den Lüfter auf den Temperaturzustand von macOS.
 - Ein wach gehaltenes, zugeklapptes MacBook gehört nicht in eine geschlossene Tasche.

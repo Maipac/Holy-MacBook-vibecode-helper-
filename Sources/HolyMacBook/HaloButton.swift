@@ -16,9 +16,21 @@ struct HaloButton: View {
         .accessibilityLabel("Wachhalten")
         .accessibilityValue(isOn ? "An" : "Aus")
         .accessibilityHint(isOn
-            ? "Lässt dein MacBook beim Zuklappen wieder schlafen."
-            : "Hält dein MacBook auch zugeklappt wach.")
+            ? "Lässt das MacBook beim Zuklappen wieder schlafen."
+            : "Hält das MacBook auch zugeklappt wach.")
+        .modifier(ToggleTrait())
         .help(isOn ? "Wachhalten ausschalten" : "Wachhalten einschalten")
+    }
+}
+
+/// Sagt VoiceOver, dass der Knopf ein Schalter ist (ab macOS 14).
+private struct ToggleTrait: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(macOS 14.0, *) {
+            content.accessibilityAddTraits(.isToggle)
+        } else {
+            content
+        }
     }
 }
 

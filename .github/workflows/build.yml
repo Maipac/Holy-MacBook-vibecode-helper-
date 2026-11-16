@@ -29,3 +29,48 @@ jobs:
         with:
           name: HolyMacBook
           path: HolyMacBook.zip
+
+      # Vorübergehend: Bildschirmfotos und ein echter Durchlauf zur Kontrolle.
+      - name: Probelauf mit Bildschirmfotos
+        run: |
+          set +e
+          APP="build/Holy MacBook.app"
+          BIN="$APP/Contents/MacOS/HolyMacBook"
+          mkdir shots
+          state() { pmset -g | grep -i sleepdisabled || echo "SleepDisabled fehlt in pmset -g"; }
+          start() { open "$APP"; sleep 6; }
+          stop() { osascript -e 'tell application "Holy MacBook" to quit'; sleep 3; pkill -x HolyMacBook; sleep 1; }
+          shot() { screencapture -x "shots/$1.png"; }
+
+          echo "== 1 nicht eingerichtet"
+          start; shot 1-setup-light; stop
+
+          echo "== Einrichtung wie in der App"
+          "$BIN" --print-setup-command
+          sudo sh -c "$("$BIN" --print-setup-command)"; echo "exit $?"
+          sudo ls -l /private/etc/sudoers.d/; sudo cat /private/etc/sudoers.d/holymacbook
+          sudo visudo -c; echo "visudo exit $?"
+
+          echo "== 2 eingerichtet, aus"
+          start; shot 2-off-light
+          echo "== Klick auf den Knopf"
+          osascript -e 'tell application "System Events" to tell process "HolyMacBook" to get entire contents of window 1'
+          osascript -e 'tell application "System Events" to tell process "HolyMacBook" to click (first button of window 1 whose description is "Wachhalten")' \
+            || osascript -e 'tell application "System Events" to tell process "HolyMacBook" to click button 1 of window 1'
+          sleep 3; state; shot 3-on-light
+          echo "== Beenden schaltet aus"
+          stop; state
+
+          echo "== 4 dunkel, an (Zustand kommt vom System)"
+          defaults write -g AppleInterfaceStyle Dark
+          sudo pmset -a disablesleep 1; state
+          start; shot 4-on-dark
+          osascript -e 'tell application "System Events" to keystroke "k" using command down'; sleep 3; state; shot 5-off-dark
+          stop; state
+          sudo pmset -a disablesleep 0
+          exit 0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shots
+          path: shots

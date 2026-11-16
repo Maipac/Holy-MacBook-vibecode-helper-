@@ -90,10 +90,22 @@ enum PowerControl {
     // MARK: Einrichtung
 
     static func install() async -> SetupResult {
+        let result = await runAsAdmin(
+            installCommand(),
+            prompt: "Holy MacBook möchte das Wachhalten einrichten. Danach schaltet der Knopf ohne Passwort."
+        )
+        if result == .done, !isSetUp {
+            return .failed("Die Regel wurde nicht angelegt.")
+        }
+        return result
+    }
+
+    /// Der Shell-Befehl, den die Einrichtung mit Admin-Rechten ausführt.
+    static func installCommand() -> String {
         let rule = "\(sudoersUser()) ALL=(root) NOPASSWD: \(pmset) -a disablesleep 0, \(pmset) -a disablesleep 1"
         // Die Regel wird erst von visudo geprüft und nur bei Erfolg installiert,
         // damit eine fehlerhafte Datei sudo nicht lahmlegen kann.
-        let command = [
+        return [
             "f=$(/usr/bin/mktemp)",
             "&& /usr/bin/printf '%s\\n' '\(rule)' > \"$f\"",
             "&& /usr/sbin/visudo -cf \"$f\"",
@@ -101,14 +113,6 @@ enum PowerControl {
             "&& /usr/bin/install -m 0440 -o root -g wheel \"$f\" \(rulePath);",
             "s=$?; /bin/rm -f \"$f\"; exit $s",
         ].joined(separator: " ")
-        let result = await runAsAdmin(
-            command,
-            prompt: "Holy MacBook möchte das Wachhalten einrichten. Danach schaltet der Knopf ohne Passwort."
-        )
-        if result == .done, !isSetUp {
-            return .failed("Die Regel wurde nicht angelegt.")
-        }
-        return result
     }
 
     static func uninstall() async -> SetupResult {

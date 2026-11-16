@@ -9,6 +9,10 @@ enum Launcher {
             Diagnose.run()
             return
         }
+        if CommandLine.arguments.contains("--print-setup-command") {
+            print(PowerControl.installCommand())
+            return
+        }
         HolyMacBookApp.main()
     }
 }
@@ -73,6 +77,11 @@ private struct MenuBarMenu: View {
         ))
         .disabled(!controller.isSetUp || controller.isBusy)
 
+        if let notice = controller.notice {
+            // Nach einer automatischen Abschaltung steht der Grund auch hier.
+            Text(notice.text)
+        }
+
         Divider()
 
         Button("Fenster öffnen") {
@@ -105,5 +114,23 @@ private struct SettingsView: View {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         KeepAwakeController.shared.shutdown()
+    }
+
+    /// Der Schalter ist auch über das Dock-Symbol erreichbar, falls das Symbol in der
+    /// Menüleiste ausgeblendet ist.
+    func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+        let controller = KeepAwakeController.shared
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+        let item = NSMenuItem(title: "Wachhalten", action: #selector(toggleKeepAwake), keyEquivalent: "")
+        item.target = self
+        item.state = controller.isActive ? .on : .off
+        item.isEnabled = controller.isSetUp && !controller.isBusy
+        menu.addItem(item)
+        return menu
+    }
+
+    @objc private func toggleKeepAwake() {
+        KeepAwakeController.shared.toggle()
     }
 }
