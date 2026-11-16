@@ -70,8 +70,12 @@ private struct HaloFace: View {
         .contentShape(Circle())
         .contentShape(.focusRing, Circle())
         .onHover { isHovered = $0 }
-        .animation(reduceMotion ? .easeInOut(duration: 0.15) : .spring(response: 0.4, dampingFraction: 0.7), value: isOn)
+        .animation(stateAnimation, value: isOn)
         .animation(.easeOut(duration: 0.12), value: isPressed)
+    }
+
+    private var stateAnimation: Animation {
+        reduceMotion ? Animation.easeInOut(duration: 0.15) : Animation.spring(response: 0.4, dampingFraction: 0.7)
     }
 
     private var rim: Color {
