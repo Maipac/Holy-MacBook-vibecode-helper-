@@ -66,8 +66,8 @@ private struct HaloFace: View {
                 .overlay {
                     Circle().strokeBorder(rim, lineWidth: contrast == .increased ? 2 : 1)
                 }
-                .shadow(color: isOn ? Color.orange.opacity(0.5) : Color.black.opacity(0.12),
-                        radius: isOn ? 26 : 5, y: isOn ? 0 : 2)
+                .shadow(color: isOn ? Color.orange.opacity(0.5) : Color.black.opacity(0.2),
+                        radius: isOn ? 26 : 7, y: isOn ? 0 : 3)
                 .frame(width: Self.diameter, height: Self.diameter)
 
             Image(systemName: isOn ? "sun.max.fill" : "moon.zzz.fill")

@@ -15,8 +15,9 @@ struct ContentView: View {
             VStack(spacing: 6) {
                 Text(controller.isActive ? "Wachhalten ist an" : "Wachhalten ist aus")
                     .font(.title2.weight(.semibold))
+                // Bewusst in der Hauptfarbe: Der Satz erklärt den Zustand, und die graue
+                // Zweitfarbe erreicht auf dem Fensterhintergrund nur etwa 3,9:1.
                 Text(subtitle)
-                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -96,7 +97,6 @@ private struct SetupBox: View {
                 Text("Einmalige Einrichtung")
                     .font(.headline)
                 Text("Damit das MacBook zugeklappt wach bleibt, braucht macOS einmal dein Passwort. Holy MacBook darf danach genau eine Sache ohne Nachfrage: den Ruhezustand sperren und wieder freigeben.")
-                    .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 Button("Einrichten…") {
                     controller.runSetup()
