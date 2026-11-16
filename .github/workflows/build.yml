@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+    paths:
+      - "Sources/**"
+      - "Resources/**"
+      - "Package.swift"
+      - "build.sh"
+      - ".github/workflows/build.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: App bauen
+        run: ./build.sh
+
+      - name: Selbsttest
+        run: '"build/Holy MacBook.app/Contents/MacOS/HolyMacBook" --diagnose'
+
+      - name: App verpacken
+        run: ditto -c -k --keepParent "build/Holy MacBook.app" HolyMacBook.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HolyMacBook
+          path: HolyMacBook.zip
